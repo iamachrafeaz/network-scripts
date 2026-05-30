@@ -123,10 +123,19 @@ iptables -A FORWARD -j DROP
 # ══════════════════════════════════════════════════════════════
 # 5. NAT
 # ══════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+# 5. NAT
+# ══════════════════════════════════════════════════════════════
 
-# Masquerade traffic leaving toward IDS/IPS
-# Only needed if you want FWA to hide downstream IPs from the router
-# Comment this out if you want the router to see real downstream IPs
-iptables -t nat -A POSTROUTING -o $LAN -j SNAT --to-source 10.0.2.4
+# Clear any legacy masquerading
+iptables -t nat -F POSTROUTING
+
+# SNAT outbound traffic leaving the WAN interface to use the WAN VIP
+iptables -t nat -A POSTROUTING -o $WAN -s $IDS_IP -j SNAT --to-source 10.0.0.4
+
+# If you want downstream subnets to work later:
+iptables -t nat -A POSTROUTING -o $WAN -s 172.16.10.0/24 -j SNAT --to-source 10.0.0.4
+iptables -t nat -A POSTROUTING -o $WAN -s 192.168.10.0/24 -j SNAT --to-source 10.0.0.4
+
 
 echo "[FWA] iptables rules loaded successfully."
