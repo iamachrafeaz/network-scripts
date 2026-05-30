@@ -46,17 +46,23 @@ iptables -A INPUT -i lo -j ACCEPT
 # Established/related sessions
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# ICMP ping — from WAN and LAN only (diagnostic)
+# ── HA Cluster Rules ──────────────────────────────────────────
+# Allow all traffic on the dedicated HA link (safest for cluster nodes)
+iptables -A INPUT -i $HA -j ACCEPT
+
+# Explicitly allow Heartbeat UDP port 694 (In case broadcast hits WAN/LAN)
+iptables -A INPUT -p udp --dport 694 -j ACCEPT
+
+# ── ICMP / Diagnostic ─────────────────────────────────────────
+# Allow ping from Router and IDS to any IP on this host (including VIPs)
 iptables -A INPUT -i $WAN -s $ROUTER_IP -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i $LAN -s $IDS_IP    -p icmp --icmp-type echo-request -j ACCEPT
 
-# SSH management — only from IDS/IPS side (never expose SSH to WAN)
+# ── SSH management ────────────────────────────────────────────
+# Only from IDS/IPS side
 iptables -A INPUT -i $LAN -s $IDS_IP -p tcp --dport 22 -j ACCEPT
 
-# HA heartbeat — only from FWA-2
-iptables -A INPUT -i $HA -s $FWA2_HA_IP -j ACCEPT
-
-# Log and drop everything else to INPUT
+# ── Log and drop everything else ──────────────────────────────
 iptables -A INPUT -j LOG --log-prefix "[FWA-INPUT-DROP] " --log-level 4
 iptables -A INPUT -j DROP
 
