@@ -127,6 +127,6 @@ iptables -A FORWARD -j DROP
 # Masquerade traffic leaving toward IDS/IPS
 # Only needed if you want FWA to hide downstream IPs from the router
 # Comment this out if you want the router to see real downstream IPs
-iptables -t nat -A POSTROUTING -o $LAN -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $LAN -j SNAT --to-source 10.0.2.4
 
 echo "[FWA] iptables rules loaded successfully."
