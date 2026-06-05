@@ -1,0 +1,18 @@
+$TTL    604800
+@       IN      SOA     dnst.achraf.com. admin.achraf.com. (
+                              3         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+; Name Servers
+@       IN      NS      dnst.achraf.com.
+
+; A Records for DMZ Public Services
+dnst    IN      A       172.16.10.20    ; This DNS Server itself
+web1    IN      A       172.16.10.10    ; WEB1 Server
+mailt   IN      A       172.16.10.30    ; MAILT Server
+
+; MX Record for Mail Routing
+@       IN      MX  10  mailt.achraf.com.
